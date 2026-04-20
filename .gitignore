@@ -1,0 +1,30 @@
+# --- JAVA / SPRING BOOT ---
+target/
+*.class
+*.jar
+*.war
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# --- ANGULAR / NODE ---
+node_modules/
+dist/
+.mercado-ui/node/
+.mercado-ui/dist/
+
+# --- IDES (IntelliJ, VS Code, etc) ---
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- SISTEMAS OPERATIVOS ---
+.DS_Store
+Thumbs.db
+
+# --- DATOS SENSIBLES (Nunca subas contraseñas) ---
+application-local.properties
+.env

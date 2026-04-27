@@ -1,5 +1,6 @@
 package com.mercado.admin.service;
 
+import com.mercado.admin.entity.Cuota;
 import com.mercado.admin.entity.Dueno;
 import com.mercado.admin.entity.Puesto;
 import com.mercado.admin.repository.CuotaRepository;
@@ -21,8 +22,9 @@ public class TransferenciaService {
 
     @Transactional
     public String transferirPuesto(String codigoPuesto, String nuevoDuenoRuc) {
-        List<?> pendientes = cuotaRepository.findByPuestoCodigoAndEstado(codigoPuesto, "PENDIENTE");
-        List<?> vencidos = cuotaRepository.findByPuestoCodigoAndEstado(codigoPuesto, "VENCIDO");
+
+        List<Cuota> pendientes = cuotaRepository.findByPuestoCodigoAndEstado(codigoPuesto, "PENDIENTE");
+        List<Cuota> vencidos = cuotaRepository.findByPuestoCodigoAndEstado(codigoPuesto, "VENCIDO");
 
         if (!pendientes.isEmpty() || !vencidos.isEmpty()) {
             return "No se puede transferir: el puesto tiene cuotas pendientes o vencidas.";

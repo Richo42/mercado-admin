@@ -103,4 +103,9 @@ public class ReciboService {
     public List<Recibo> obtenerTodos() {
         return reciboRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public List<Recibo> listarPorPuesto(String puestoCodigo) {
+        return cuotaRepository.findRecibosByPuestoCodigo(puestoCodigo);
+    }
 }

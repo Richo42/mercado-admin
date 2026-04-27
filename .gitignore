@@ -1,4 +1,4 @@
-# --- JAVA / SPRING BOOT ---
+# Java / Spring Boot
 target/
 *.class
 *.jar
@@ -7,13 +7,13 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-# --- ANGULAR / NODE ---
+# Angular / Node
 node_modules/
 dist/
 .mercado-ui/node/
 .mercado-ui/dist/
 
-# --- IDES (IntelliJ, VS Code, etc) ---
+# IDE
 .idea/
 *.iml
 .vscode/
@@ -21,10 +21,11 @@ dist/
 *.swo
 *~
 
-# --- SISTEMAS OPERATIVOS ---
+# OS
 .DS_Store
 Thumbs.db
 
-# --- DATOS SENSIBLES (Nunca subas contraseñas) ---
-application-local.properties
+# Logs & Env
+*.log
 .env
+application-local.properties

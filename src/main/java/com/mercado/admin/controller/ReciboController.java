@@ -1,6 +1,7 @@
 package com.mercado.admin.controller;
 
 import com.mercado.admin.dto.ReciboDTO;
+import com.mercado.admin.entity.Recibo;
 import com.mercado.admin.service.ReciboService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +32,15 @@ public class ReciboController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al crear recibo: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/puesto/{codigo}")
+    public ResponseEntity<List<Recibo>> listarPorPuesto(@PathVariable String codigo) {
+        List<Recibo> recibos = reciboService.listarPorPuesto(codigo);
+
+        if (recibos.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(recibos);
     }
 }

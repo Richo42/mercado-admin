@@ -2,10 +2,13 @@ package com.mercado.admin.config;
 
 import com.mercado.admin.entity.Dueno;
 import com.mercado.admin.entity.Puesto;
+import com.mercado.admin.entity.Usuario;
 import com.mercado.admin.repository.DuenoRepository;
 import com.mercado.admin.repository.PuestoRepository;
+import com.mercado.admin.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
@@ -17,6 +20,8 @@ public class DataInitializer implements CommandLineRunner {
 
     private final PuestoRepository puestoRepository;
     private final DuenoRepository duenoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -54,5 +59,15 @@ public class DataInitializer implements CommandLineRunner {
         puestoRepository.saveAll(nuevosPuestos);
         System.out.println(" - 100 puestos (P-1 a P-100) creados correctamente.");
         System.out.println("FIN: Inicialización completada.");
+
+        // Crear usuario admin inicial si no existe
+        if (usuarioRepository.count() == 0) {
+            Usuario admin = new Usuario();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("123456")); // Se hashea en memoria, no queda texto plano
+            admin.setRole("ADMIN");
+            usuarioRepository.save(admin);
+            System.out.println("Usuario 'admin' creado correctamente.");
+        }
     }
 }

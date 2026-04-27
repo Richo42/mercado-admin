@@ -6,6 +6,7 @@ import com.mercado.admin.service.ReciboService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +24,12 @@ public class ReciboController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody ReciboDTO dto) {
+    public ResponseEntity<?> crear(
+            @Valid @RequestBody ReciboDTO dto,
+            @AuthenticationPrincipal String adminRegistro) { //  Extrae el username del token JWT
         try {
-            ReciboDTO creado = reciboService.crearRecibo(dto);
+            // ✅ Pasamos el usuario autenticado al service
+            ReciboDTO creado = reciboService.crearRecibo(dto, adminRegistro);
             return ResponseEntity.status(201).body(creado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

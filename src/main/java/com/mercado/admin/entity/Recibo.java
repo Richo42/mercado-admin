@@ -35,4 +35,7 @@ public class Recibo {
 
     @Column(name = "archivo_adjunto")
     private String archivoAdjunto;
+
+    @Column(name = "admin_registro", nullable = false)
+    private String adminRegistro;
 }

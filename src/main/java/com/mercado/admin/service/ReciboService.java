@@ -35,7 +35,7 @@ public class ReciboService {
      * el recibo no se guarda y la base de datos vuelve a su estado anterior.
      */
     @Transactional
-    public ReciboDTO crearRecibo(ReciboDTO dto) {
+    public ReciboDTO crearRecibo(ReciboDTO dto, String adminRegistro) {
         Recibo recibo = new Recibo();
         recibo.setTipo(dto.tipo());
         recibo.setCategoria(dto.categoria());
@@ -44,6 +44,7 @@ public class ReciboService {
         recibo.setFechaVencimiento(dto.fechaVencimiento());
         recibo.setArchivoAdjunto(dto.archivoAdjunto());
 
+        recibo.setAdminRegistro(adminRegistro);
         recibo = reciboRepository.save(recibo);
 
         String periodo = recibo.getFechaEmision().format(DateTimeFormatter.ofPattern("yyyy-MM"));

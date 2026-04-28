@@ -7,6 +7,8 @@ import com.mercado.admin.entity.Recibo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface CuotaRepository extends JpaRepository<Cuota, Long> {
@@ -53,4 +55,7 @@ public interface CuotaRepository extends JpaRepository<Cuota, Long> {
             @Param("desde") String desde,
             @Param("hasta") String hasta
     );
+
+    @Query("SELECT COALESCE(SUM(c.monto), 0) FROM Cuota c WHERE c.puesto.codigo = :puestoCodigo AND c.estado = 'PENDIENTE'")
+    BigDecimal findDeudaPendienteByPuesto(@Param("puestoCodigo") String puestoCodigo);
 }

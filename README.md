@@ -68,7 +68,6 @@ Backend robusto desarrollado con **Spring Boot 3.2.4** para la administración i
 
 ---
 
-## 🏗️ Arquitectura
 ## 🏗️ Arquitectura del Proyecto
 
 El proyecto sigue una **arquitectura en capas** limpia y desacoplada:

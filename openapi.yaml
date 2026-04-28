@@ -1,0 +1,766 @@
+openapi: 3.0.3
+info:
+  title: Mercado Admin API
+  description: API para la gestión de administración de mercado - Gestión de dueños, puestos, cuotas, recibos y pagos
+  version: 1.0.0
+  contact:
+    name: Mercado Admin Support
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Autenticación
+    description: Endpoints para autenticación de usuarios
+  - name: Dueños
+    description: Operaciones CRUD para dueños de puestos
+  - name: Puestos
+    description: Operaciones CRUD para puestos del mercado
+  - name: Cuotas
+    description: Consulta de cuotas y deudas por puesto
+  - name: Recibos
+    description: Operaciones para gestión de recibos
+  - name: Pagos
+    description: Registro de pagos de cuotas
+  - name: Reportes
+    description: Reportes de recaudación
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Autentica un usuario y devuelve un token JWT
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Credenciales inválidas
+        '404':
+          description: Usuario no encontrado
+
+  /api/duenos:
+    get:
+      tags:
+        - Dueños
+      summary: Listar todos los dueños
+      description: Obtiene la lista completa de dueños registrados
+      operationId: listarDuenos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de dueños obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dueno'
+        '401':
+          description: No autorizado
+
+    post:
+      tags:
+        - Dueños
+      summary: Crear un nuevo dueño
+      description: Registra un nuevo dueño en el sistema
+      operationId: crearDueno
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuenoDTO'
+      responses:
+        '201':
+          description: Dueño creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dueno'
+        '400':
+          description: Datos inválidos o DNI/RUC ya existe
+        '401':
+          description: No autorizado
+
+  /api/duenos/{dniRuc}:
+    get:
+      tags:
+        - Dueños
+      summary: Buscar dueño por DNI/RUC
+      description: Obtiene los detalles de un dueño específico
+      operationId: buscarDueno
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dniRuc
+          in: path
+          required: true
+          description: DNI (8 dígitos) o RUC (11 dígitos) del dueño
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dueño encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dueno'
+        '404':
+          description: Dueño no encontrado
+        '401':
+          description: No autorizado
+
+    put:
+      tags:
+        - Dueños
+      summary: Actualizar dueño
+      description: Actualiza la información de un dueño existente
+      operationId: actualizarDueno
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dniRuc
+          in: path
+          required: true
+          description: DNI/RUC del dueño a actualizar
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuenoDTO'
+      responses:
+        '200':
+          description: Dueño actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dueno'
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Dueño no encontrado
+        '401':
+          description: No autorizado
+
+    delete:
+      tags:
+        - Dueños
+      summary: Eliminar dueño
+      description: Elimina un dueño del sistema
+      operationId: eliminarDueno
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dniRuc
+          in: path
+          required: true
+          description: DNI/RUC del dueño a eliminar
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Dueño eliminado exitosamente
+        '404':
+          description: Dueño no encontrado
+        '401':
+          description: No autorizado
+
+  /api/puestos:
+    get:
+      tags:
+        - Puestos
+      summary: Listar todos los puestos
+      description: Obtiene la lista completa de puestos del mercado
+      operationId: listarPuestos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de puestos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Puesto'
+        '401':
+          description: No autorizado
+
+    post:
+      tags:
+        - Puestos
+      summary: Crear un nuevo puesto
+      description: Registra un nuevo puesto asignado a un dueño
+      operationId: crearPuesto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PuestoDTO'
+      responses:
+        '201':
+          description: Puesto creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Puesto'
+        '400':
+          description: Datos inválidos o código de puesto ya existe
+        '401':
+          description: No autorizado
+        '404':
+          description: Dueño no encontrado
+
+  /api/puestos/{codigo}:
+    get:
+      tags:
+        - Puestos
+      summary: Buscar puesto por código
+      description: Obtiene los detalles de un puesto específico
+      operationId: buscarPuesto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código único del puesto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Puesto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Puesto'
+        '404':
+          description: Puesto no encontrado
+        '401':
+          description: No autorizado
+
+    delete:
+      tags:
+        - Puestos
+      summary: Eliminar puesto
+      description: Elimina un puesto del sistema
+      operationId: eliminarPuesto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código del puesto a eliminar
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Puesto eliminado exitosamente
+        '404':
+          description: Puesto no encontrado
+        '401':
+          description: No autorizado
+
+  /api/puestos/{codigo}/transferir:
+    post:
+      tags:
+        - Puestos
+      summary: Transferir puesto
+      description: Transfiere un puesto a un nuevo dueño
+      operationId: transferirPuesto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código del puesto a transferir
+          schema:
+            type: string
+        - name: nuevoDuenoRuc
+          in: query
+          required: true
+          description: DNI/RUC del nuevo dueño
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Puesto transferido exitosamente
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: No se puede transferir el puesto
+        '401':
+          description: No autorizado
+        '404':
+          description: Puesto o nuevo dueño no encontrado
+
+  /api/cuotas/puesto/{codigo}:
+    get:
+      tags:
+        - Cuotas
+      summary: Ver deudas de un puesto
+      description: Obtiene el detalle de cuotas pendientes de un puesto
+      operationId: verDeudasPuesto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código del puesto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deudas obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CuotaDTO'
+        '404':
+          description: No se encontraron deudas para este puesto
+        '401':
+          description: No autorizado
+
+  /api/recibos:
+    get:
+      tags:
+        - Recibos
+      summary: Listar todos los recibos
+      description: Obtiene la lista completa de recibos emitidos
+      operationId: listarRecibos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de recibos obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/Recibo'
+                    - $ref: '#/components/schemas/ReciboDTO'
+        '401':
+          description: No autorizado
+
+    post:
+      tags:
+        - Recibos
+      summary: Crear un nuevo recibo
+      description: Emite un nuevo recibo de cobro
+      operationId: crearRecibo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReciboDTO'
+      responses:
+        '201':
+          description: Recibo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciboDTO'
+        '400':
+          description: Datos inválidos o error al crear recibo
+        '401':
+          description: No autorizado
+
+  /api/recibos/puesto/{codigo}:
+    get:
+      tags:
+        - Recibos
+      summary: Listar recibos por puesto
+      description: Obtiene los recibos emitidos para un puesto específico
+      operationId: listarRecibosPorPuesto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código del puesto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recibos obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recibo'
+        '404':
+          description: No se encontraron recibos para este puesto
+        '401':
+          description: No autorizado
+
+  /api/pagos/total:
+    post:
+      tags:
+        - Pagos
+      summary: Registrar pago total
+      description: Registra el pago total de las deudas de un puesto
+      operationId: registrarPagoTotal
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagoRequestDTO'
+      responses:
+        '200':
+          description: Pago registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobantePagoDTO'
+        '400':
+          description: Error al procesar el pago
+        '401':
+          description: No autorizado
+
+  /api/reportes/recaudacion:
+    get:
+      tags:
+        - Reportes
+      summary: Obtener reporte de recaudación
+      description: Obtiene un reporte de recaudación filtrado por fechas
+      operationId: obtenerRecaudacion
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: desde
+          in: query
+          required: false
+          description: Fecha de inicio del periodo (formato YYYY-MM-DD)
+          schema:
+            type: string
+        - name: hasta
+          in: query
+          required: false
+          description: Fecha de fin del periodo (formato YYYY-MM-DD)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reporte obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReporteRecaudacionDTO'
+        '401':
+          description: No autorizado
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Nombre de usuario
+        password:
+          type: string
+          format: password
+          description: Contraseña del usuario
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT de autenticación
+
+    Dueno:
+      type: object
+      description: Dueño de un puesto del mercado
+      properties:
+        dniRuc:
+          type: string
+          description: DNI (8 dígitos) o RUC (11 dígitos) del dueño
+          pattern: '^\d{8}$|^\d{11}$'
+        nombreRazonSocial:
+          type: string
+          description: Nombre completo o razón social
+          maxLength: 150
+        celular:
+          type: string
+          description: Número de celular
+          pattern: '^\d{9}$'
+
+    DuenoDTO:
+      type: object
+      required:
+        - dniRuc
+        - nombreRazonSocial
+      properties:
+        dniRuc:
+          type: string
+          description: DNI (8 dígitos) o RUC (11 dígitos) del dueño
+          pattern: '^\d{8}$|^\d{11}$'
+        nombreRazonSocial:
+          type: string
+          description: Nombre completo o razón social
+          maxLength: 150
+        celular:
+          type: string
+          description: Número de celular
+          pattern: '^\d{9}$'
+
+    Puesto:
+      type: object
+      description: Puesto del mercado
+      properties:
+        codigo:
+          type: string
+          description: Código único del puesto
+          maxLength: 10
+        duenoActual:
+          $ref: '#/components/schemas/Dueno'
+
+    PuestoDTO:
+      type: object
+      required:
+        - codigo
+        - duenoRuc
+      properties:
+        codigo:
+          type: string
+          description: Código único del puesto
+        duenoRuc:
+          type: string
+          description: DNI/RUC del dueño asignado
+
+    CuotaDTO:
+      type: object
+      description: Detalle de cuota de un puesto
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la cuota
+        puestoCodigo:
+          type: string
+          description: Código del puesto asociado
+        tipoServicio:
+          type: string
+          description: Tipo de servicio (ej. agua, luz, mantenimiento)
+        categoria:
+          type: string
+          description: Categoría del servicio
+        monto:
+          type: number
+          format: decimal
+          description: Monto de la cuota
+        estado:
+          type: string
+          description: Estado de la cuota (PENDIENTE, PAGADO)
+          enum:
+            - PENDIENTE
+            - PAGADO
+        periodo:
+          type: string
+          description: Periodo de la cuota (ej. 2024-01)
+        fechaPago:
+          type: string
+          format: date
+          description: Fecha de pago
+        adminRegistro:
+          type: string
+          description: Usuario administrador que registró el pago
+
+    Recibo:
+      type: object
+      description: Recibo de cobro emitido
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del recibo
+        tipo:
+          type: string
+          description: Tipo de recibo
+        categoria:
+          type: string
+          description: Categoría del concepto
+        montoTotal:
+          type: number
+          format: decimal
+          description: Monto total del recibo
+        fechaEmision:
+          type: string
+          format: date
+          description: Fecha de emisión del recibo
+        fechaVencimiento:
+          type: string
+          format: date
+          description: Fecha de vencimiento
+        archivoAdjunto:
+          type: string
+          description: Ruta del archivo adjunto
+        adminRegistro:
+          type: string
+          description: Usuario administrador que emitió el recibo
+
+    ReciboDTO:
+      type: object
+      required:
+        - tipo
+        - categoria
+        - montoTotal
+        - fechaEmision
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del recibo
+        tipo:
+          type: string
+          description: Tipo de recibo
+        categoria:
+          type: string
+          description: Categoría del concepto
+        montoTotal:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Monto total del recibo
+        fechaEmision:
+          type: string
+          format: date
+          description: Fecha de emisión del recibo
+        fechaVencimiento:
+          type: string
+          format: date
+          description: Fecha de vencimiento
+        archivoAdjunto:
+          type: string
+          description: Ruta del archivo adjunto
+        puestoCodigo:
+          type: string
+          description: Código del puesto asociado
+
+    PagoRequestDTO:
+      type: object
+      required:
+        - puestoCodigo
+      properties:
+        puestoCodigo:
+          type: string
+          description: Código del puesto que realiza el pago
+
+    ComprobantePagoDTO:
+      type: object
+      description: Comprobante de pago generado
+      properties:
+        numeroComprobante:
+          type: string
+          description: Número único del comprobante
+        fechaEmision:
+          type: string
+          format: date-time
+          description: Fecha y hora de emisión del comprobante
+        puestoCodigo:
+          type: string
+          description: Código del puesto que realizó el pago
+        adminRegistro:
+          type: string
+          description: Usuario administrador que registró el pago
+        montoTotalPagado:
+          type: number
+          format: decimal
+          description: Monto total pagado
+        detalle:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetalleComprobanteDTO'
+          description: Detalle de las cuotas pagadas
+
+    DetalleComprobanteDTO:
+      type: object
+      description: Detalle de una cuota en el comprobante
+      properties:
+        tipoServicio:
+          type: string
+          description: Tipo de servicio pagado
+        periodo:
+          type: string
+          description: Periodo de la cuota pagada
+        monto:
+          type: number
+          format: decimal
+          description: Monto pagado
+
+    ReporteRecaudacionDTO:
+      type: object
+      description: Reporte de recaudación por periodo
+      properties:
+        periodo:
+          type: string
+          description: Periodo del reporte (ej. 2024-01)
+        totalEmitido:
+          type: number
+          format: decimal
+          description: Total emitido en recibos
+        totalCobrado:
+          type: number
+          format: decimal
+          description: Total cobrado
+        totalPendiente:
+          type: number
+          format: decimal
+          description: Total pendiente de cobro
+        puestosConDeuda:
+          type: integer
+          format: int64
+          description: Cantidad de puestos con deuda
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido mediante el endpoint /api/auth/login
